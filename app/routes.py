@@ -7,7 +7,7 @@ api_blueprint = Blueprint('api', __name__)
 @api_blueprint.route('/search/<ticker>', methods=['GET'])
 def search_stock(ticker):
     data = get_stock_data(ticker)
-    if data:
+    if data and data['name']:
         return jsonify(data), 200
     return jsonify({'error': 'Stock not found'}), 404
 
@@ -80,7 +80,7 @@ def get_portfolio():
             'price_per_share': transaction.price_per_share,
             'transaction_type': transaction.transaction_type,
             'timestamp': transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'cost_of_purchase': transaction.price_per_share * transaction.shares
+            'total_cost': transaction.price_per_share * transaction.shares
         }
         for transaction in transactions
     ]

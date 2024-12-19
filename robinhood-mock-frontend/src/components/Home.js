@@ -23,7 +23,7 @@ function Home() {
     return (
         <div className="container mt-5">
             <SearchStock onTransactionComplete={fetchPortfolio} />
-            <h2 className="text-white">My Portfolio</h2>
+            <h2>My Portfolio</h2>
             <table className="table table-dark table-striped">
                 <thead>
                     <tr>
@@ -32,6 +32,7 @@ function Home() {
                         <th>Price per Share</th>
                         <th>Transaction Type</th>
                         <th>Timestamp</th>
+                        <th>Total Cost</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,6 +43,7 @@ function Home() {
                             <td>${item.price_per_share.toFixed(2)}</td>
                             <td>{item.transaction_type}</td>
                             <td>{item.timestamp}</td>
+                            <td>{item.total_cost}</td>
                         </tr>
                     ))}
                 </tbody>
