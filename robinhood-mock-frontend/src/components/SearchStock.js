@@ -4,6 +4,7 @@ import axios from 'axios';
 function SearchStock() {
     const [ticker, setTicker] = useState('');
     const [stockData, setStockData] = useState(null);
+    const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState('');
 
     const handleSearch = async () => {
@@ -12,13 +13,25 @@ function SearchStock() {
             setStockData(response.data);
             setError('');
         } catch (err) {
-            if (err.response && err.response.status === 404) {
-                setError('Stock not found');
-                setStockData(null);
-            } else {
-                setError('An error occurred');
-                setStockData(null);
-            }
+            setError('Stock not found');
+            setStockData(null);
+        }
+    };
+
+    const handleBuy = async () => {
+        if (!stockData) {
+            setError('No stock data available for buying');
+            return;
+        }
+        try {
+            const response = await axios.post('http://localhost:5000/buy', {
+                ticker: stockData.ticker,
+                shares: quantity,
+                price: stockData.price
+            });
+            alert('Purchase successful');
+        } catch (err) {
+            setError('Purchase failed');
         }
     };
 
@@ -36,9 +49,18 @@ function SearchStock() {
                 <div className="stock-data">
                     <h2>{stockData.name} ({stockData.ticker})</h2>
                     {stockData.price ? (
-                    <p> Current Price: {stockData.price} {stockData.currency}</p>
+                        <>
+                            <p>Current Price: {stockData.price} {stockData.currency}</p>
+                            <input
+                                type="number"
+                                value={quantity}
+                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
+                                min="1"
+                            />
+                            <button onClick={handleBuy}>Buy</button>
+                        </>
                     ) : (
-                    <p>Stock price unavailable</p>
+                        <p>Stock price unavailable</p>
                     )}
                 </div>
             )}

@@ -8,12 +8,20 @@ function Login({ onLogin }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/login', { username, password });
+            const response = await axios.post('http://localhost:5000/login', {
+                username,
+                password
+            }, {
+                withCredentials: true
+            });
             onLogin();
+            console.log('Login successful:', response.data);
         } catch (error) {
+            console.error('Login failed:', error.response ? error.response.data : error);
             alert('Login Failed');
         }
     };
+    
 
     return (
         <form onSubmit={handleLogin}>

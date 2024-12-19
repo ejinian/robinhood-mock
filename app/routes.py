@@ -34,26 +34,59 @@ def login():
     password = data.get('password')
     user = User.query.filter_by(username=username, password=password).first()
     if user:
+        print("logged in")
         session['user_id'] = user.id
+        print(session)
         return jsonify({'message': 'Login successful'}), 200
     return jsonify({'message': 'Login failed'}), 401
 
 @api_blueprint.route('/logout')
 def logout():
     session.pop('user_id', None)
-    return redirect(url_for('index'))
+    return jsonify({'message': 'Logged out successfully'}), 200
+
 
 @api_blueprint.route('/buy', methods=['POST'])
 def buy_stock():
-    user_id = session.get('user_id')
-    if not user_id:
-        return 'Please log in'
+    print("got here")
+    print(session)
+    if 'user_id' not in session:
+        print("happened")
+        return jsonify({'message': 'Please log in'}), 401
 
-    ticker = request.form['ticker']
-    shares = int(request.form['shares'])
-    price = float(request.form['price'])
+    data = request.get_json()
+    ticker = data['ticker']
+    shares = int(data.get('shares', 1))
+    price = float(data['price'])
+    print("got here2")
 
-    transaction = Transaction(user_id=user_id, stock_ticker=ticker, shares=shares, price_per_share=price, transaction_type='buy')
+    transaction = Transaction(
+        user_id=session['user_id'],
+        stock_ticker=ticker,
+        shares=shares,
+        price_per_share=price,
+        transaction_type='buy'
+    )
     db.session.add(transaction)
     db.session.commit()
-    return 'Stock purchased'
+    return jsonify({'message': 'Stock purchased'}), 200
+
+@api_blueprint.route('/portfolio', methods=['GET'])
+def get_portfolio():
+    if 'user_id' not in session:
+        return jsonify({'message': 'Please log in'}), 401
+
+    user_id = session['user_id']
+    transactions = Transaction.query.filter_by(user_id=user_id).all()
+    portfolio_data = [
+        {
+            'ticker': transaction.stock_ticker,
+            'shares': transaction.shares,
+            'price_per_share': transaction.price_per_share,
+            'transaction_type': transaction.transaction_type,
+            'timestamp': transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'cost_of_purchase': transaction.price_per_share * transaction.shares
+        }
+        for transaction in transactions
+    ]
+    return jsonify(portfolio_data), 200
