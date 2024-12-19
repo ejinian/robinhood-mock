@@ -6,25 +6,25 @@ function Home() {
     const [portfolio, setPortfolio] = useState([]);
 
     useEffect(() => {
-        const fetchPortfolio = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/portfolio', {
-                    withCredentials: true
-                });
-                setPortfolio(response.data);
-            } catch (error) {
-                console.error('Error fetching portfolio:', error);
-            }
-        };
-
         fetchPortfolio();
     }, []);
 
+    const fetchPortfolio = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/portfolio', {
+                withCredentials: true
+            });
+            setPortfolio(response.data);
+        } catch (error) {
+            console.error('Error fetching portfolio:', error);
+        }
+    };
+
     return (
-        <div>
-            <SearchStock></SearchStock>
-            <h2>My Portfolio</h2>
-            <table>
+        <div className="container mt-5">
+            <SearchStock onTransactionComplete={fetchPortfolio} />
+            <h2 className="text-white">My Portfolio</h2>
+            <table className="table table-dark table-striped">
                 <thead>
                     <tr>
                         <th>Ticker</th>
@@ -32,7 +32,6 @@ function Home() {
                         <th>Price per Share</th>
                         <th>Transaction Type</th>
                         <th>Timestamp</th>
-                        <th>Cost of Purchase</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,7 +42,6 @@ function Home() {
                             <td>${item.price_per_share.toFixed(2)}</td>
                             <td>{item.transaction_type}</td>
                             <td>{item.timestamp}</td>
-                            <td>{item.cost_of_purchase}</td>
                         </tr>
                     ))}
                 </tbody>

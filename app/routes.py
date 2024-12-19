@@ -34,9 +34,7 @@ def login():
     password = data.get('password')
     user = User.query.filter_by(username=username, password=password).first()
     if user:
-        print("logged in")
         session['user_id'] = user.id
-        print(session)
         return jsonify({'message': 'Login successful'}), 200
     return jsonify({'message': 'Login failed'}), 401
 
@@ -48,17 +46,13 @@ def logout():
 
 @api_blueprint.route('/buy', methods=['POST'])
 def buy_stock():
-    print("got here")
-    print(session)
     if 'user_id' not in session:
-        print("happened")
         return jsonify({'message': 'Please log in'}), 401
 
     data = request.get_json()
     ticker = data['ticker']
     shares = int(data.get('shares', 1))
     price = float(data['price'])
-    print("got here2")
 
     transaction = Transaction(
         user_id=session['user_id'],
@@ -90,3 +84,31 @@ def get_portfolio():
         for transaction in transactions
     ]
     return jsonify(portfolio_data), 200
+
+@api_blueprint.route('/sell', methods=['POST'])
+def sell_stock():
+    if 'user_id' not in session:
+        return jsonify({'message': 'Please log in'}), 401
+
+    data = request.get_json()
+    ticker = data['ticker']
+    shares = int(data.get('shares', 1))
+    price = float(data['price'])
+
+    transactions = Transaction.query.filter_by(user_id=session['user_id'], stock_ticker=ticker).all()
+    total_shares_bought = sum(t.shares for t in transactions if t.transaction_type == 'buy')
+    total_shares_sold = sum(t.shares for t in transactions if t.transaction_type == 'sell')
+
+    if total_shares_bought - total_shares_sold < shares:
+        return jsonify({'message': 'Not enough shares to sell'}), 400
+
+    transaction = Transaction(
+        user_id=session['user_id'],
+        stock_ticker=ticker,
+        shares=-shares,
+        price_per_share=price,
+        transaction_type='sell'
+    )
+    db.session.add(transaction)
+    db.session.commit()
+    return jsonify({'message': 'Stock sold successfully'}), 200

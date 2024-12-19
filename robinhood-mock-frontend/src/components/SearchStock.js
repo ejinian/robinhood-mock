@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function SearchStock() {
+function SearchStock({ onTransactionComplete }) {
     const [ticker, setTicker] = useState('');
     const [stockData, setStockData] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -30,38 +30,57 @@ function SearchStock() {
                 price: stockData.price
             });
             alert('Purchase successful');
+            onTransactionComplete();
         } catch (err) {
             setError('Purchase failed');
         }
     };
 
+    const handleSell = async () => {
+        try {
+            const response = await axios.post('http://localhost:5000/sell', {
+                ticker: stockData.ticker,
+                shares: quantity,
+                price: stockData.price
+            });
+            alert('Sale successful');
+            onTransactionComplete();
+        } catch (err) {
+            setError('Sale failed');
+            console.error(err);
+        }
+    };
+
     return (
-        <div>
-            <input
-                type="text"
-                value={ticker}
-                onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                placeholder="Enter a stock ticker (e.g., AAPL)"
-            />
-            <button onClick={handleSearch}>Search</button>
-            {error && <div className="error">{error}</div>}
+        <div className="container mt-5">
+            <div className="input-group mb-3">
+                <input
+                    type="text"
+                    className="form-control"
+                    value={ticker}
+                    onChange={(e) => setTicker(e.target.value.toUpperCase())}
+                    placeholder="Enter a stock ticker (e.g., AAPL)"
+                />
+                <div className="input-group-append">
+                    <button className="btn btn-outline-secondary" onClick={handleSearch}>Search</button>
+                </div>
+            </div>
+            {error && <div className="alert alert-danger">{error}</div>}
             {stockData && (
-                <div className="stock-data">
-                    <h2>{stockData.name} ({stockData.ticker})</h2>
-                    {stockData.price ? (
-                        <>
-                            <p>Current Price: {stockData.price} {stockData.currency}</p>
-                            <input
-                                type="number"
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
-                                min="1"
-                            />
-                            <button onClick={handleBuy}>Buy</button>
-                        </>
-                    ) : (
-                        <p>Stock price unavailable</p>
-                    )}
+                <div className="card text-white bg-success mb-3">
+                    <div className="card-header">{stockData.name} ({stockData.ticker})</div>
+                    <div className="card-body">
+                        <h5 className="card-title">Current Price: {stockData.price} {stockData.currency}</h5>
+                        <input
+                            type="number"
+                            className="form-control mb-3"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
+                            min="1"
+                        />
+                        <button className="btn btn-light mr-2" onClick={handleBuy}>Buy</button> &nbsp; &nbsp;
+                        <button className="btn btn-light" onClick={handleSell}>Sell</button>
+                    </div>
                 </div>
             )}
         </div>
