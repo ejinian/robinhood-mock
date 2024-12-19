@@ -47,6 +47,7 @@ def logout():
 @api_blueprint.route('/buy', methods=['POST'])
 def buy_stock():
     if 'user_id' not in session:
+        print('here')
         return jsonify({'message': 'Please log in'}), 401
 
     data = request.get_json()
@@ -92,20 +93,22 @@ def sell_stock():
 
     data = request.get_json()
     ticker = data['ticker']
-    shares = int(data.get('shares', 1))
+    shares_to_sell = int(data.get('shares', 1))
     price = float(data['price'])
 
     transactions = Transaction.query.filter_by(user_id=session['user_id'], stock_ticker=ticker).all()
     total_shares_bought = sum(t.shares for t in transactions if t.transaction_type == 'buy')
     total_shares_sold = sum(t.shares for t in transactions if t.transaction_type == 'sell')
 
-    if total_shares_bought - total_shares_sold < shares:
+    net_shares = total_shares_bought - abs(total_shares_sold)
+
+    if net_shares < shares_to_sell:
         return jsonify({'message': 'Not enough shares to sell'}), 400
 
     transaction = Transaction(
         user_id=session['user_id'],
         stock_ticker=ticker,
-        shares=-shares,
+        shares=-shares_to_sell,
         price_per_share=price,
         transaction_type='sell'
     )

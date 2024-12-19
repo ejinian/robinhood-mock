@@ -53,3 +53,24 @@ div.stock-data h2,
 div.stock-data p {
   margin: 5px 0;
 }
+
+.container {
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #04c46b;
+}
+
+.btn-primary {
+  background-color: #086434 !important;
+  border-color: #04c46b !important;
+}
+
+.btn-primary:hover {
+  background-color: #04c46b;
+}

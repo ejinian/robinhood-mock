@@ -4,7 +4,6 @@ def get_stock_data(ticker):
     try:
         stock = yf.Ticker(ticker)
         hist = stock.history(period="1d")
-        print(hist)
         if not hist.empty:
             last_close = hist['Close'].iloc[-1]
         else:

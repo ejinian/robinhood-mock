@@ -30,9 +30,10 @@ function SearchStock({ onTransactionComplete }) {
                 price: stockData.price
             });
             alert('Purchase successful');
+            setError('');
             onTransactionComplete();
         } catch (err) {
-            setError('Purchase failed');
+            setError(`Purchase failed. ${err['response']['data']['message']}`);
         }
     };
 
@@ -44,9 +45,10 @@ function SearchStock({ onTransactionComplete }) {
                 price: stockData.price
             });
             alert('Sale successful');
+            setError('');
             onTransactionComplete();
         } catch (err) {
-            setError('Sale failed');
+            setError(`Purchase failed. ${err['response']['data']['message']}`);
             console.error(err);
         }
     };
